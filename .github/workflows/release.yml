@@ -17,11 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      # The newer sdkmanager (cmdline-tools 16) requires JDK 17+,
+      # but AGP 3.5 must build with JDK 8. Install SDK pieces under 17,
+      # then build under 8.
+
+      - name: Set up JDK 17 (for sdkmanager)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '17'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -29,13 +33,20 @@ jobs:
       # AGP 3.5 needs these pinned SDK components installed explicitly.
       - name: Install SDK components
         run: |
+          yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-29" "build-tools;29.0.2"
+
+      - name: Set up JDK 8 (for Gradle build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
 
       - name: Give gradlew execute permission
         run: chmod +x gradlew
 
-      # ponytail: offiline deps still need to resolve xposed api from jcenter/mavenCentral.
-      # jcenter is dead; if resolution fails, add a maven repo/mirror for de.robv.android.xposed.
+      # ponytail: deps need to resolve de.robv.android.xposed from jcenter (dead) / mavenCentral.
+      # If resolution fails here, point at a mirror or mavenCentral in build.gradle.
       - name: Build release APK
         run: ./gradlew assembleRelease --no-daemon
 
