@@ -17,8 +17,9 @@ buildscript {
 allprojects {
     repositories {
         google()
+        // jcenter 已关闭，用阿里云镜像替代（xposed:api:82 只在 jcenter 发布过）
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
         jcenter()
-        
     }
 }
 
