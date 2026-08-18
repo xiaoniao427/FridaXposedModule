@@ -13,6 +13,8 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
+        // AGP 3.5 无法处理最新 NDK（其 abis.json 含 riscv64 会报错），固定旧版
+        ndkVersion "21.4.7075529"
     }
     buildTypes {
         release {
